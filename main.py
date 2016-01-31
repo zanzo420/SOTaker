@@ -7,7 +7,7 @@ import json
 import requests
 
 
-def loadJson(url):
+def load_json(url):
     res = requests.get(url)
     js = res.text
     obj_ = json.loads(js)
@@ -24,13 +24,14 @@ def get_question_ids(searchfor):
     hits = data['results']
     ids_ = ""
     for h in hits:
-        id_ = re.search(r"/(\d+)/", h["url"])
+        id_ = re.search(r"questions/(\d+)/", h["url"])
         if id_:
             ids_ += id_.group(1) + ";"
     return ids_[:len(ids_)-1]
 
 search_term = input("Search for: ")
-ids = get_question_ids(search_term + " site:stackoverflow.com")
+ids = get_question_ids(search_term +
+                       " site:http://stackoverflow.com/questions -site:stackoverflow.com/questions/tagged/")
 
 if ids == "":
     print("No results found.")
@@ -38,9 +39,9 @@ if ids == "":
 
 # key for Stack Exchange API
 key = "ByWaOHYZMBBi5O4eNX6DyA(("
-searchurl = "https://api.stackexchange.com/2.2/questions/"+ids+\
-            "/answers?order=desc&sort=activity&site=stackoverflow&filter=!bJDus)chijK43X@key="+key
-obj = loadJson(searchurl)
+searchurl = "https://api.stackexchange.com/2.2/questions/" + ids + \
+            "/answers?order=desc&sort=activity&site=stackoverflow&filter=!bJDus)chijK43X&key=" + key
+obj = load_json(searchurl)
 
 if "error_id" in obj:
     print("ERROR: " + obj["error_name"])
@@ -51,9 +52,9 @@ score = -10000
 best_answer = ""
 highest_score_answer = ""
 for i in range(len(obj["items"])):
+    item = obj["items"][i]
     if item["score"] < score:
         continue
-    item = obj["items"][i]
     score = item["score"]
     body = item["body"]
     highest_score_answer = body
@@ -81,4 +82,3 @@ else:
             longest = length
             best_snippet = code
     print(best_snippet)
-
