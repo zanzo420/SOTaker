@@ -1,0 +1,1 @@
+[Gif example](http://i.imgur.com/ZEKi9JM.gifv)
