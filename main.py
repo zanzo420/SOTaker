@@ -15,22 +15,27 @@ def get_question_ids(searchfor):
   search_results = search_response.read().decode("utf8")
   results = json.loads(search_results)
   data = results['responseData']
-  #print('Total results: %s' % data['cursor']['estimatedResultCount'])
   hits = data['results']
-  #print('Top %d hits:' % len(hits))
   ids = ""
   for h in hits:
-      print(' ', h['url'])
       id = re.search(r"/(\d+)/", h["url"])
       if id:
           ids+=id.group(1) + ";"
   return ids[:len(ids)-1]
 
 # TODO user input
-search_term = "quicksort java implementation".replace(' ', '+')
+input = input("Search for: ")
+search_term = input.replace(' ', '+')
 ids = get_question_ids(search_term + " site:stackoverflow.com")
-searchurl = "https://api.stackexchange.com/2.2/questions/"+ids+"/answers?order=desc&sort=activity&site=stackoverflow&filter=!bJDus)chijK43X"
+#key for Stack Exchange API
+key = "ByWaOHYZMBBi5O4eNX6DyA((";
+searchurl = "https://api.stackexchange.com/2.2/questions/"+ids+"/answers?order=desc&sort=activity&site=stackoverflow&filter=!bJDus)chijK43X@key="+key
 obj = loadJson(searchurl)
+
+if "error_id" in obj:
+    print("ERROR: " + obj["error_name"])
+    print(obj["error_message"])
+    exit(0)
 
 score = -10000
 best_answer = ""
@@ -48,8 +53,10 @@ best = ""
 if len(soup.find_all("code")) == 0:
     print(soup.text)
 else:
-    # bias towards answers more towards the end
+    # bias towards answers more towards the end (since usually the final answer is at the bottom)
+    # also bias towards longer snippets of code
     count = 1
+
     for link in soup.find_all("code"):
         code = link.contents[0]
         length = len(code)
