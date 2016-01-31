@@ -27,11 +27,11 @@ def get_question_ids(searchfor):
         id_ = re.search(r"questions/(\d+)/", h["url"])
         if id_:
             ids_ += id_.group(1) + ";"
-    return ids_[:len(ids_)-1]
+    return ids_[:len(ids_) - 1]
+
 
 search_term = input("Search for: ")
-ids = get_question_ids(search_term +
-                       " site:http://stackoverflow.com/questions -site:stackoverflow.com/questions/tagged/")
+ids = get_question_ids(search_term + " site:http://stackoverflow.com/questions -site:stackoverflow.com/questions/tagged/")
 
 if ids == "":
     print("No results found.")
