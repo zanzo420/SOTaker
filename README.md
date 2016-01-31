@@ -1,1 +1,1 @@
-[Gif example](http://i.imgur.com/ZEKi9JM.gifv)
+![Gif example](/example_gif.gif)
