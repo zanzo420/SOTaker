@@ -30,7 +30,7 @@ def get_question_ids(searchfor):
     return ids_[:len(ids_)-1]
 
 search_term = input("Search for: ")
-ids = get_question_ids(search_term + " site:stackoverflow.com")
+ids = get_question_ids(search_term + " site:http://stackoverflow.com/questions -site:stackoverflow.com/questions/tagged/")
 
 if ids == "":
     print("No results found.")
@@ -81,4 +81,3 @@ else:
             longest = length
             best_snippet = code
     print(best_snippet)
-
