@@ -20,6 +20,9 @@ def get_question_ids(searchfor):
     search_response = urllib.request.urlopen(url)
     search_results = search_response.read().decode("utf8")
     results = json.loads(search_results)
+    if results["responseStatus"] != 200:
+        print("Response " + str(results["responseStatus"]) + ": " + results["responseDetails"])
+        exit(0)
     data = results['responseData']
     hits = data['results']
     ids_ = ""
@@ -31,7 +34,7 @@ def get_question_ids(searchfor):
 
 
 search_term = input("Search for: ")
-ids = get_question_ids(search_term + " site:http://stackoverflow.com/questions -site:stackoverflow.com/questions/tagged/")
+ids = get_question_ids(search_term + " site:stackoverflow.com/questions -site:stackoverflow.com/questions/tagged/")
 
 if ids == "":
     print("No results found.")
@@ -48,20 +51,26 @@ if "error_id" in obj:
     print(obj["error_message"])
     exit(0)
 
-score = -10000
+highest_score = -10000
+highest_accepted_score = -10000
 best_answer = ""
 highest_score_answer = ""
 for i in range(len(obj["items"])):
     item = obj["items"][i]
-    if item["score"] < score:
-        continue
     score = item["score"]
     body = item["body"]
-    highest_score_answer = body
-    if item["is_accepted"] == "True":
+    if score > highest_score:
+        highest_score_answer = body
+        highest_score = score
+    if item["is_accepted"] and score > highest_accepted_score:
         best_answer = body
+        highest_accepted_score = score
 
-if best_answer == "":
+# for answers that are highly upvoted but not accepted
+score_diff = highest_score - highest_accepted_score
+tolerance = 100
+
+if best_answer == "" or score_diff >= tolerance:
     best_answer = highest_score_answer
 
 soup = bs4.BeautifulSoup(best_answer, "html.parser")
