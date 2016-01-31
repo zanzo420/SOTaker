@@ -29,10 +29,13 @@ def get_question_ids(searchfor):
             ids_ += id_.group(1) + ";"
     return ids_[:len(ids_)-1]
 
-# TODO user input
-input_ = input("Search for: ")
-search_term = input_.replace(' ', '+')
+search_term = input("Search for: ")
 ids = get_question_ids(search_term + " site:stackoverflow.com")
+
+if ids == "":
+    print("No results found.")
+    exit(0)
+
 # key for Stack Exchange API
 key = "ByWaOHYZMBBi5O4eNX6DyA(("
 searchurl = "https://api.stackexchange.com/2.2/questions/"+ids+\
