@@ -1,4 +1,6 @@
 import requests, json, bs4
+import re
+import urllib.request, urllib.parse
 
 def loadJson(url):
     res = requests.get(url)
@@ -6,26 +8,41 @@ def loadJson(url):
     obj = json.loads(js)
     return obj
 
+def get_question_ids(searchfor):
+  query = urllib.parse.urlencode({'q': searchfor})
+  url = 'http://ajax.googleapis.com/ajax/services/search/web?v=1.0&%s' % query
+  search_response = urllib.request.urlopen(url)
+  search_results = search_response.read().decode("utf8")
+  results = json.loads(search_results)
+  data = results['responseData']
+  #print('Total results: %s' % data['cursor']['estimatedResultCount'])
+  hits = data['results']
+  #print('Top %d hits:' % len(hits))
+  ids = ""
+  for h in hits:
+      print(' ', h['url'])
+      id = re.search(r"/(\d+)/", h["url"])
+      if id:
+          ids+=id.group(1) + ";"
+  return ids[:len(ids)-1]
 
 # TODO user input
-search_term = "async java".replace(' ', '+')
-searchurl = "https://api.stackexchange.com/2.2/search/advanced?order=desc&sort=activity&q=" + search_term + \
-            "&answers=1&site=stackoverflow&filter=!mVN)3JfAau"
+search_term = "quicksort java implementation".replace(' ', '+')
+ids = get_question_ids(search_term + " site:stackoverflow.com")
+searchurl = "https://api.stackexchange.com/2.2/questions/"+ids+"/answers?order=desc&sort=activity&site=stackoverflow&filter=!bJDus)chijK43X"
 obj = loadJson(searchurl)
-answer_id = 0
-question_title = ""
-for i in range(len(obj["items"])):
-    if "accepted_answer_id" in obj["items"][i]:
-        answer_id = obj["items"][i]['accepted_answer_id']
-        question_title = obj["items"][i]["title"]
 
-print(answer_id)
-print("//" + question_title)
-answer_url = "https://api.stackexchange.com/2.2/answers/" + str(answer_id) + \
-            "?order=desc&sort=activity&site=stackoverflow&filter=!9YdnSMKKT"
-obj = loadJson(answer_url)
-answer_body = obj["items"][0]["body"]
-soup = bs4.BeautifulSoup(answer_body, "html.parser")
+score = -10000
+best_answer = ""
+for i in range(len(obj["items"])):
+    item = obj["items"][i]
+    body = item["body"]
+    if item["is_accepted"] == "False" or item["score"] < score:
+        continue
+    score = item["score"]
+    best_answer = body
+
+soup = bs4.BeautifulSoup(best_answer, "html.parser")
 longest = 0
 best = ""
 if len(soup.find_all("code")) == 0:
