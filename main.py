@@ -55,8 +55,7 @@ highest_score = -10000
 highest_accepted_score = -10000
 best_answer = ""
 highest_score_answer = ""
-for i in range(len(obj["items"])):
-    item = obj["items"][i]
+for item in obj["items"]:
     score = item["score"]
     body = item["body"]
     if score > highest_score:
